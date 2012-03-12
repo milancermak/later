@@ -113,11 +113,6 @@ class Scheduler(object):
     def remove_job_by_name(self, job_name):
         self.store.remove_job(job_name)
 
-    def start(self):
-        pass
-
     def stop(self):
         for job_name in self.store.jobs.keys():
             self.store.remove_job(job_name)
-
-    
