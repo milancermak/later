@@ -23,22 +23,18 @@ class Job(object):
 
 
     def __call__(self):
-        retval = None
-
         try:
             # schedule next call
             if self._is_periodic:
                 self._timer = threading.Timer(self.delay, self)
                 self._timer.start()
+
             # execute on the current one
-            retval = self.fn()
+            self.fn()
 
         except StopJobException:
             if self._is_periodic:
                 self._store.remove_job(self.name)
-
-        finally:
-            return retval
 
     def start(self):
         self._timer.start()
