@@ -89,6 +89,14 @@ class Scheduler(object):
     def _calc_seconds(self, days, hours, minutes, seconds):
         return seconds + minutes * 60 + hours * 3600 + days * 86400
 
+    def _job_name(self, job):
+        if isinstance(job, Job):
+            return job.name
+        elif isinstance(job, basestring):
+            return job
+        else:
+            raise ValueError("Expected string or instance of Job, got %s instead" % type(job))
+
     def add_delayed_job(self, func, name=None, days=0, hours=0, minutes=0, seconds=0):
         job = self._build_job(func, name, days, hours, minutes, seconds)
         self.store.add_job(job)
@@ -104,9 +112,7 @@ class Scheduler(object):
         return self.store.has_job(job_name)
 
     def remove_job(self, job):
-        self.remove_job_by_name(job.name)
-
-    def remove_job_by_name(self, job_name):
+        job_name = self._job_name(job)
         self.store.remove_job(job_name)
 
     def stop(self):
