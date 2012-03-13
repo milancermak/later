@@ -34,6 +34,11 @@ class Job(object):
 
         except StopJobException:
             if self._is_periodic:
+                self._timer.cancel()
+                self._is_periodic = False
+
+        finally:
+            if not self._is_periodic:
                 self._store.remove_job(self.name)
 
     def start(self):
