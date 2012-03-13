@@ -12,11 +12,10 @@ class StopJobException(ValueError):
 
 class Job(object):
 
-    def __init__(self, fn, delay, name, store):
+    def __init__(self, fn, delay, name):
         self.fn = fn
         self.delay = delay
         self.name = name if name else str(id(self))
-        self.store = store
 
         self.is_periodic = False
         self.timer = threading.Timer(self.delay, self)
@@ -33,12 +32,8 @@ class Job(object):
 
         except StopJobException:
             if self.is_periodic:
-                self.timer.cancel()
+                self.stop()
                 self.is_periodic = False
-
-        finally:
-            if not self.is_periodic:
-                self.store.remove_job(self.name)
 
     def start(self):
         self.timer.start()
@@ -75,21 +70,21 @@ class RAMJobStore(BaseJobStore):
     def add_job(self, job):
         with self.rw_lock:
             self.jobs[job.name] = job
-        job.start()
+            job.start()
 
     def has_job(self, name):
         return name in self.jobs
 
     def purge(self):
         with self.rw_lock:
-            for job_name in self.jobs:
+            for job_name in self.jobs.keys():
                 job = self.jobs.pop(job_name)
                 job.stop()
 
     def remove_job(self, name):
         with self.rw_lock:
             job = self.jobs.pop(name)
-        job.stop()
+            job.stop()
 
 
 class Scheduler(object):
@@ -101,7 +96,7 @@ class Scheduler(object):
         delay_in_seconds = self._calc_seconds(days, hours, minutes, seconds)
         if delay_in_seconds <= 0:
             raise ValueError("Can't schedule job in the past")
-        return Job(func, delay_in_seconds, name, self.store)
+        return Job(func, delay_in_seconds, name)
 
     def _calc_seconds(self, days, hours, minutes, seconds):
         return seconds + minutes * 60 + hours * 3600 + days * 86400
