@@ -12,48 +12,51 @@ class StopJobException(ValueError):
 
 class Job(object):
 
-    def __init__(self, fn, delay=0, name=None):
-        self.delay = delay
+    def __init__(self, fn, delay, name, store):
         self.fn = fn
+        self.delay = delay
         self.name = name if name else str(id(self))
+        self.store = store
 
-        self._is_periodic = False
-        self._store = None
-        self._timer = threading.Timer(self.delay, self)
-
+        self.is_periodic = False
+        self.timer = threading.Timer(self.delay, self)
 
     def __call__(self):
         try:
             # schedule next call
-            if self._is_periodic:
-                self._timer = threading.Timer(self.delay, self)
-                self._timer.start()
+            if self.is_periodic:
+                self.timer = threading.Timer(self.delay, self)
+                self.timer.start()
 
             # execute on the current one
             self.fn()
 
         except StopJobException:
-            if self._is_periodic:
-                self._timer.cancel()
-                self._is_periodic = False
+            if self.is_periodic:
+                self.timer.cancel()
+                self.is_periodic = False
 
         finally:
-            if not self._is_periodic:
-                self._store.remove_job(self.name)
+            if not self.is_periodic:
+                self.store.remove_job(self.name)
 
     def start(self):
-        self._timer.start()
+        self.timer.start()
 
     def stop(self):
-        self._timer.cancel()
+        self.timer.cancel()
 
 
 class BaseJobStore(object):
 
     def __init__(self):
         self.jobs = None
+        self.rw_lock = threading.Lock()
 
     def add_job(self, job):
+        raise NotImplementedError
+
+    def purge(self):
         raise NotImplementedError
 
     def has_job(self, name):
@@ -66,17 +69,26 @@ class BaseJobStore(object):
 class RAMJobStore(BaseJobStore):
 
     def __init__(self):
+        super(RAMJobStore, self).__init__()
         self.jobs = {}
 
     def add_job(self, job):
-        self.jobs[job.name] = job
+        with self.rw_lock:
+            self.jobs[job.name] = job
         job.start()
 
     def has_job(self, name):
         return name in self.jobs
 
+    def purge(self):
+        with self.rw_lock:
+            for job_name in self.jobs:
+                job = self.jobs.pop(job_name)
+                job.stop()
+
     def remove_job(self, name):
-        job = self.jobs.pop(name)
+        with self.rw_lock:
+            job = self.jobs.pop(name)
         job.stop()
 
 
@@ -89,7 +101,7 @@ class Scheduler(object):
         delay_in_seconds = self._calc_seconds(days, hours, minutes, seconds)
         if delay_in_seconds <= 0:
             raise ValueError("Can't schedule job in the past")
-        return Job(func, delay_in_seconds, name)
+        return Job(func, delay_in_seconds, name, self.store)
 
     def _calc_seconds(self, days, hours, minutes, seconds):
         return seconds + minutes * 60 + hours * 3600 + days * 86400
@@ -121,5 +133,4 @@ class Scheduler(object):
         self.store.remove_job(job_name)
 
     def stop(self):
-        for job_name in self.store.jobs.keys():
-            self.store.remove_job(job_name)
+        self.store.purge()
