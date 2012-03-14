@@ -42,30 +42,11 @@ class Job(object):
         self.timer.cancel()
 
 
-class BaseJobStore(object):
+class JobStore(object):
 
     def __init__(self):
-        self.jobs = None
-        self.rw_lock = threading.Lock()
-
-    def add_job(self, job):
-        raise NotImplementedError
-
-    def purge(self):
-        raise NotImplementedError
-
-    def has_job(self, name):
-        raise NotImplementedError
-
-    def remove_job(self, name):
-        raise NotImplementedError
-
-
-class RAMJobStore(BaseJobStore):
-
-    def __init__(self):
-        super(RAMJobStore, self).__init__()
         self.jobs = {}
+        self.rw_lock = threading.Lock()
 
     def add_job(self, job):
         with self.rw_lock:
