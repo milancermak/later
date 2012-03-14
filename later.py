@@ -93,13 +93,13 @@ class Scheduler(object):
     def add_delayed_job(self, func, name=None, days=0, hours=0, minutes=0, seconds=0):
         job = self._build_job(func, name, days, hours, minutes, seconds)
         self.store.add_job(job)
-        return job
+        return job.name
 
     def add_periodic_job(self, func, name=None, days=0, hours=0, minutes=0, seconds=0):
         job = self._build_job(func, name, days, hours, minutes, seconds)
         job._is_periodic = True
         self.store.add_job(job)
-        return job
+        return job.name
 
     def is_job_scheduled(self, job_name):
         return self.store.has_job(job_name)
