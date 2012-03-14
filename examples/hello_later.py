@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import functools
-import later
+from later import later
 
 
 def hello_world():

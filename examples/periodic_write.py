@@ -2,7 +2,7 @@
 
 import datetime
 import functools
-import later
+from later import later
 
 
 def timestamp_to_file(filename):
