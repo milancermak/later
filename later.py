@@ -74,13 +74,10 @@ class Scheduler(object):
         self.store = RAMJobStore()
 
     def _build_job(self, func, name, days, hours, minutes, seconds):
-        delay_in_seconds = self._calc_seconds(days, hours, minutes, seconds)
+        delay_in_seconds = seconds + minutes * 60 + hours * 3600 + days * 86400
         if delay_in_seconds <= 0:
             raise ValueError("Can't schedule job in the past")
         return Job(func, delay_in_seconds, name)
-
-    def _calc_seconds(self, days, hours, minutes, seconds):
-        return seconds + minutes * 60 + hours * 3600 + days * 86400
 
     def _job_name(self, job):
         if isinstance(job, Job):
