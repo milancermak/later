@@ -71,7 +71,7 @@ class JobStore(object):
 class Scheduler(object):
 
     def __init__(self):
-        self.store = RAMJobStore()
+        self.store = JobStore()
 
     def _build_job(self, func, name, days, hours, minutes, seconds):
         delay_in_seconds = seconds + minutes * 60 + hours * 3600 + days * 86400

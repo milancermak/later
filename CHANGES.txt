@@ -1,1 +1,2 @@
+v0.1.2, 2012-03-14 -- Fixing an error in the initial release
 v0.1.0, 2012-03-14 -- Initial release
