@@ -1,13 +1,16 @@
+----
 WHAT
 ----
 
 Later is a in-process thread-safe scheduler for Python. It is licensed under the `Simplified BSD license <http://en.wikipedia.org/wiki/BSD_licenses#2-clause_license_.28.22Simplified_BSD_License.22_or_.22FreeBSD_License.22.29>`_.
 
+---
 WHY
 ---
 
 None of the existing python schedulers suited my needs so I had to write my own.
 
+---
 HOW
 ---
 
