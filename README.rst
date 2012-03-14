@@ -18,7 +18,7 @@ Later is really easy to use. In your process, you create an instance of the ``Sc
 
 ::
 
-    import later
+    from later import later
     scheduler = later.Scheduler()
 
 The most important methods of ``Scheduler`` are ``add_delayed_job`` and ``add_periodic_job``. Use the first one to trigger a function only once in the future. The later one can be used to schedule the same function in intervals. The only required parameter to these methods is the callable that will be executed in the future.
@@ -37,7 +37,8 @@ You can also pass a ``name`` parameter. This should be a string that acts as an 
     cappuccino_maker = functools.partial(make_espresso, cream=True, whipped=True)
     scheduler.add_periodic_job(cappuccino_maker, name="Cappuccino FTW", hours=3) # make a cappuccino every 3 hours
 
-See the `examples/` directory in the repo for some more examples on how to use Later.
+
+If you want to end the periodic job from *inside*, raise ``later.StopJobException`` in it. This will cause the scheduler to stop any planned executions of the job. See the `examples/` directory in the repo for some more examples on how to use Later.
 
 Because the scheduling is based on the `threading.Timer <http://docs.python.org/library/threading.html#timer-objects>`_ class, keep in mind the execution may not fire in **precisely** the same moment as you specified.
 
