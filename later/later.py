@@ -50,6 +50,8 @@ class JobStore(object):
 
     def add_job(self, job):
         with self.rw_lock:
+            if self.has_job(job.name):
+                self.remove_job(job.name)
             self.jobs[job.name] = job
             job.start()
 
@@ -64,8 +66,9 @@ class JobStore(object):
 
     def remove_job(self, name):
         with self.rw_lock:
-            job = self.jobs.pop(name)
-            job.stop()
+            if self.has_job(name):
+                job = self.jobs.pop(name)
+                job.stop()
 
 
 class Scheduler(object):
