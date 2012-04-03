@@ -104,8 +104,8 @@ class Scheduler(object):
     def is_job_scheduled(self, job_name):
         return self.store.has_job(job_name)
 
-    def remove_job(self, job):
-        job_name = self._job_name(job)
+    def remove_job(self, job_inst_or_name):
+        job_name = self._job_name(job_inst_or_name)
         self.store.remove_job(job_name)
 
     def stop(self):
