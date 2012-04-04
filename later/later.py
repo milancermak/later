@@ -97,7 +97,7 @@ class Scheduler(object):
 
     def add_periodic_job(self, func, name=None, days=0, hours=0, minutes=0, seconds=0):
         job = self._build_job(func, name, days, hours, minutes, seconds)
-        job._is_periodic = True
+        job.is_periodic = True
         self.store.add_job(job)
         return job.name
 
